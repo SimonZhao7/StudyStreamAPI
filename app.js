@@ -1,19 +1,31 @@
 require('express-async-errors')
 require('dotenv').config()
+const connectDB = require('./db/connect')
+// Middleware
+const errorHandler = require('./middleware/errorHandler')
+// Routes
+const userRouter = require('./routes/userRouter')
 
 const express = require('express')
 const app = express()
 
-app.get('/', (req, res) => {
-    res.send('Initial setup of API')
-})
+app.use(express.json())
+
+app.use('/api/v1/users', userRouter)
+
+app.use(errorHandler)
 
 port = process.env.PORT || 8000
 
-const start = () => {
-    app.listen(port, () => {
-        console.log(`Server is listening on port ${port}`)
-    })
+const start = async () => {
+    try {
+        await connectDB(process.env.MONGO_URI)
+        app.listen(port, () => {
+            console.log(`Server is listening on port ${port}`)
+        })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 start()
