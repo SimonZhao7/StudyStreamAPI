@@ -13,7 +13,7 @@ const register = async (req, res) => {
 
     const user = await User.create(req.body)
     const token = await user.getJWT()
-    res.status(200).json({ token })
+    res.status(201).json({ token })
 }
 
 module.exports = { register }
