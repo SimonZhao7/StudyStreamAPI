@@ -1,19 +1,17 @@
-const User = require('../models/user');
-const { BadRequestError } = require('../errors');
+const User = require('../models/user')
+const { DoesNotExist } = require('../errors')
 
-const register = async (req, res) => {
-    const { password, confirmPassword } = req.body
-
-    if (!confirmPassword) {
-        throw new BadRequestError('No password confirmation provided', 'confirmPassword')
+const getUser = async (req, res) => {
+    const { id } = req.params
+    const user = await User.findById(id).select('-password')
+    if (!user) {
+        throw new DoesNotExist('User does not exist with provided id')
     }
-    if (password !== confirmPassword) {
-        throw new BadRequestError('Paswords do not match', 'password')
-    }
-
-    const user = await User.create(req.body)
-    const token = await user.getJWT()
-    res.status(201).json({ token })
+    res.status(200).json({ user })
 }
 
-module.exports = { register }
+const getCurrentUser = async (req, res) => {
+    res.status(200).json(req.user)
+}
+
+module.exports = { getUser, getCurrentUser }

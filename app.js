@@ -4,7 +4,9 @@ const cors = require('cors')
 const connectDB = require('./db/connect')
 // Middleware
 const errorHandler = require('./middleware/errorHandler')
+const authMiddleware = require('./middleware/auth')
 // Routes
+const userAuthRouter = require('./routes/userAuthRouter')
 const userRouter = require('./routes/userRouter')
 
 const express = require('express')
@@ -18,6 +20,11 @@ var corsOptions = {
 app.use(express.json())
 app.use(cors(corsOptions))
 
+app.use('/api/v1/auth', userAuthRouter)
+
+app.use(authMiddleware)
+
+// Auth Routes
 app.use('/api/v1/users', userRouter)
 
 app.use(errorHandler)

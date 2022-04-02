@@ -53,6 +53,10 @@ userSchema.methods.getJWT = async function () {
     return token
 }
 
+userSchema.methods.checkPassword = async function(inputPassword) {
+    return await bcrypt.compare(inputPassword, this.password)
+}
+
 userSchema.pre('save', async function () {
     const salt = await bcrypt.genSalt(15)
     const hashedPassword = await bcrypt.hash(this.password, salt)
