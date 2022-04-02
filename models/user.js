@@ -32,6 +32,12 @@ const userSchema = mongoose.Schema({
         default:
             'https://storage.googleapis.com/user-account-imgs/no-profile-img.png',
     },
+    studySets: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'StudySet',
+        }
+    ],
     recentlyViewedSets: [
         {
             type: mongoose.Schema.Types.ObjectId,

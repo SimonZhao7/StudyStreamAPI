@@ -8,6 +8,7 @@ const authMiddleware = require('./middleware/auth')
 // Routes
 const userAuthRouter = require('./routes/userAuthRouter')
 const userRouter = require('./routes/userRouter')
+const studySetRouter = require('./routes/studySetRouter')
 
 const express = require('express')
 const app = express()
@@ -26,6 +27,7 @@ app.use(authMiddleware)
 
 // Auth Routes
 app.use('/api/v1/users', userRouter)
+app.use('/api/v1/studysets', studySetRouter)
 
 app.use(errorHandler)
 
