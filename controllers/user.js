@@ -7,11 +7,13 @@ const getUser = async (req, res) => {
     if (!user) {
         throw new DoesNotExist('User does not exist with provided id')
     }
-    res.status(200).json({ user })
+    res.status(200).json(user)
 }
 
 const getCurrentUser = async (req, res) => {
-    res.status(200).json(req.user)
+    const { userId } = req.user
+    const user = await User.findById(userId).select('-password')
+    res.status(200).json(user)
 }
 
 module.exports = { getUser, getCurrentUser }

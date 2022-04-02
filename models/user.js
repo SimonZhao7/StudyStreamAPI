@@ -51,8 +51,8 @@ userSchema.plugin(uniqueValidator, {
 })
 
 userSchema.methods.getJWT = async function () {
-    const { email, username, userImage, recentlyViewedSets, _id: userId } = this
-    const payload = { email, username, userImage, recentlyViewedSets, userId }
+    const { _id: userId } = this
+    const payload = { userId }
     const token = await jwt.sign(payload, process.env.JWTOKEN, {
         expiresIn: '30d',
     })

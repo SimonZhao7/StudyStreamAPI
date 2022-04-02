@@ -16,7 +16,7 @@ const errorHandler = (err, req, res, next) => {
             errors.push({ field: error, message: raisedErrors[error].message })
         })
     }
-    return res.status(err.statusCode || 400).json({ errors })
+    return res.status(err.statusCode || 400).json(errors)
 }
 
 module.exports = errorHandler
