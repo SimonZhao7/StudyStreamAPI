@@ -15,6 +15,13 @@ const errorHandler = (err, req, res, next) => {
         Object.keys(raisedErrors).forEach((error) => {
             errors.push({ field: error, message: raisedErrors[error].message })
         })
+    } else if (err.name === 'CastError') {
+        const modelName = err.message.split('\"')[5]
+        err.statusCode = 404
+        errors.push({
+            field: '',
+            message: `${modelName} does not exist with provided id`
+        })
     }
     return res.status(err.statusCode || 400).json(errors)
 }
