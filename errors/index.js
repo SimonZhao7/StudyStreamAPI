@@ -1,11 +1,11 @@
 const BadRequestError = require('./BadRequestError')
-const DoesNotExist = require('./DoesNotExist')
+const DoesNotExistError = require('./DoesNotExistError')
 const UnauthorizedError = require('./UnauthorizedError')
 const CustomError = require('./CustomError')
 
 module.exports = {
     BadRequestError,
     CustomError,
-    DoesNotExist,
+    DoesNotExistError,
     UnauthorizedError,
 }

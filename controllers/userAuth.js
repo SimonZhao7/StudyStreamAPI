@@ -13,7 +13,7 @@ const register = async (req, res) => {
 
     const user = await User.create(req.body)
     const token = await user.getJWT()
-    res.status(201).json(token)
+    res.status(201).json({ token })
 }
 
 const login = async (req, res) => {
@@ -24,7 +24,7 @@ const login = async (req, res) => {
         throw new BadRequestError('Incorrect username or password', ['username', 'password'])
     }
     const token = await user.getJWT()
-    res.status(200).json(token)
+    res.status(200).json({ token })
 }
 
 module.exports = { register, login }

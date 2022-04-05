@@ -32,12 +32,11 @@ const studySetSchema = mongoose.Schema(
 // Add to user
 studySetSchema.post('save', async function () {
     const user = await User.findById(this.creator)
-    const updatedUser = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
         this.creator,
         { studySets: [...user.studySets, this._id] },
         { new: true, runValidators: true }
     )
-    console.log(updatedUser)
 })
 
 module.exports = mongoose.model('StudySet', studySetSchema)
