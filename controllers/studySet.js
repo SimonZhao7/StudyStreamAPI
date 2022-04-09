@@ -61,8 +61,7 @@ const deleteStudySet = async (req, res) => {
     if (!studySet) {
         throw new DoesNotExistError('StudySet does not exist with provided id')
     }
-
-    res.status(200).json({ msg: 'Successfully Removed' })
+    res.status(200).json({ msg: 'Successfully Deleted' })
 }
 
 module.exports = {

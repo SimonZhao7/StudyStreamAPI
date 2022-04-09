@@ -17,4 +17,18 @@ const createFlashcard = async (req, res) => {
     res.status(201).json(flashcard)
 }
 
-module.exports = { getFlashcard, createFlashcard }
+const deleteFlashcard = async (req, res) => {
+    const { userId } = req.user
+    const { id } = req.params
+    const flashcard = await Flashcard.findById(id)
+
+    // Make sure user owns this flashcard
+    if (!flashcard || ! await flashcard.getStudySet(userId)) {
+        throw new DoesNotExistError('No Flashcard exists with provided id')
+    }
+
+    await Flashcard.findByIdAndDelete(id)
+    res.status(200).json({ msg: 'Successfully deleted' })
+}
+
+module.exports = { getFlashcard, createFlashcard, deleteFlashcard }

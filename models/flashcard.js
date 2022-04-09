@@ -25,4 +25,8 @@ flashcardSchema.post('save', async function() {
     await StudySet.findByIdAndUpdate(setId, { flashcards: [...studySet.flashcards, this._id] })
 })
 
+flashcardSchema.methods.getStudySet = async function(userId) {
+    return await StudySet.find({ id: this.studySet, creator: userId })
+}
+
 module.exports = mongoose.model('Flashcard', flashcardSchema)
