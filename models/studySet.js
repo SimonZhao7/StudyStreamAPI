@@ -26,8 +26,10 @@ const studySetSchema = mongoose.Schema(
             },
         ],
     },
-    { timestamp: true }
+    { timestamps: true }
 )
+
+studySetSchema.index({ title: 'text' })
 
 // Add to user
 studySetSchema.post('save', async function () {

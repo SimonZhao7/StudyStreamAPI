@@ -10,8 +10,45 @@ const createStudySet = async (req, res) => {
 }
 
 const getStudySets = async (req, res) => {
-    const studySets = await StudySet.find({})
-    res.status(200).json(studySets)
+    const { user, sort, select, title, limit, page } = req.query
+
+    const resultLimit = limit || 20
+
+    const query = StudySet.find({})
+    const countQuery = StudySet.find({})
+
+    if (user) {
+        query.find({ creator: user })
+        countQuery.find({ creator: user })
+    }
+
+    if (title) {
+        query.find({ $text: { $search: title } })
+        countQuery.find({ $text: { $search: title } })
+    }
+
+    if (sort) {
+        sortString = sort.split(',').join(' ')
+        query.sort(sortString)
+    }
+
+    if (select) {
+        selectString = select.split(',').join(' ')
+        query.select(selectString)
+    }
+
+    if (page) {
+        query.skip((page - 1) * resultLimit)
+    }
+
+    query.limit(resultLimit)
+
+    const studySets = await query
+    const totalStudySets = (await countQuery).length
+    res.status(200).json({
+        studySets,
+        maxPages: Math.ceil(totalStudySets / resultLimit),
+    })
 }
 
 const getStudySet = async (req, res) => {
