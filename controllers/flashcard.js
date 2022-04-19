@@ -37,11 +37,12 @@ const deleteFlashcard = async (req, res) => {
     const flashcard = await Flashcard.findById(id)
 
     // Make sure user owns this flashcard
-    if (!flashcard || ! await flashcard.getStudySet(userId)) {
+    if (!flashcard || !await flashcard.getStudySet(userId)) {
         throw new DoesNotExistError('Flashcard does not exist with provided id')
     }
 
-    await Flashcard.findByIdAndDelete(id)
+    await flashcard.removeFromSet(id)
+    await Flashcard.deleteOne({ _id: id })
     res.status(200).json({ msg: 'Successfully deleted' })
 }
 
