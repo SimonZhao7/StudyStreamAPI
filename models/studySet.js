@@ -41,4 +41,15 @@ studySetSchema.post('save', async function () {
     )
 })
 
+studySetSchema.methods.addViewedUser = async function (userId) {
+    const recentViewedUsers = this.recentlyViewedUsers
+    if (!recentViewedUsers.includes(userId)) {
+        await mongoose.model('StudySet').findByIdAndUpdate(
+            this._id,
+            { recentlyViewedUsers: [...recentViewedUsers, userId] },
+            { runValidators: true }
+        )
+    }
+}
+
 module.exports = mongoose.model('StudySet', studySetSchema)

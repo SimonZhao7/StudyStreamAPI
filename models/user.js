@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema({
         {
             type: mongoose.Types.ObjectId,
             ref: 'StudySet',
-        }
+        },
     ],
     recentlyViewedSets: [
         {
@@ -59,8 +59,38 @@ userSchema.methods.getJWT = async function () {
     return token
 }
 
-userSchema.methods.checkPassword = async function(inputPassword) {
+userSchema.methods.checkPassword = async function (inputPassword) {
     return await bcrypt.compare(inputPassword, this.password)
+}
+
+userSchema.methods.addViewedStudySet = async function (studySetId) {
+    const recentViewedSets = this.recentlyViewedSets
+    if (!recentViewedSets.includes(studySetId)) {
+        if (recentViewedSets.length + 1 > 6) {
+            recentViewedSets.shift()
+            const studySet = await mongoose
+                .model('StudySet')
+                .findById(studySetId)
+            await mongoose
+                .model('StudySet')
+                .findByIdAndUpdate(
+                    studySetId,
+                    {
+                        recentlyViewedUsers:
+                            studySet.recentlyViewedUsers.splice(this._id, 1),
+                    },
+                    { runValidators: true }
+                )
+        }
+
+        await mongoose
+            .model('User')
+            .findByIdAndUpdate(
+                this._id,
+                { recentlyViewedSets: [...recentViewedSets, studySetId] },
+                { runValidators: true }
+            )
+    }
 }
 
 userSchema.pre('save', async function () {

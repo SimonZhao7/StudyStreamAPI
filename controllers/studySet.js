@@ -1,4 +1,5 @@
 const StudySet = require('../models/studySet')
+const User = require('../models/user')
 const { DoesNotExistError } = require('../errors')
 
 const createStudySet = async (req, res) => {
@@ -63,6 +64,12 @@ const getStudySet = async (req, res) => {
 
     if (!studySetById) {
         throw new DoesNotExistError('StudySet does not exist with provided id')
+    }
+
+    if (userId) {
+        const user = await User.findById(userId)
+        user.addViewedStudySet(id)
+        studySetById.addViewedUser(userId)
     }
 
     res.status(200).json({

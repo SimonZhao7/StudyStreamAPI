@@ -12,7 +12,9 @@ const getUser = async (req, res) => {
 
 const getCurrentUser = async (req, res) => {
     const { userId } = req.user
-    const user = await User.findById(userId).select('-password')
+    const user = await User.findById(userId)
+        .select('-password')
+        .populate('recentlyViewedSets')
     if (!user) {
         throw new DoesNotExistError('User does not exist with provided id')
     }
