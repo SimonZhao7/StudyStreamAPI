@@ -21,4 +21,16 @@ const getCurrentUser = async (req, res) => {
     res.status(200).json(user)
 }
 
-module.exports = { getUser, getCurrentUser }
+const updateUser = async (req, res) => {
+    const { id } = req.params
+    const { email, username, password, userImage, spotifyRefreshToken } = req.body
+
+    const user = await User.findByIdAndUpdate(
+        id,
+        { email, username, password, userImage, spotifyRefreshToken },
+        { runValidators: true, new: true }
+    )
+    res.status(200).json(user)
+}
+
+module.exports = { getUser, getCurrentUser, updateUser }

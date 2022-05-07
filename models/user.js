@@ -44,6 +44,9 @@ const userSchema = mongoose.Schema({
             ref: 'StudySet',
         },
     ],
+    spotifyRefreshToken: {
+        type: String
+    }
 })
 
 userSchema.plugin(uniqueValidator, {
