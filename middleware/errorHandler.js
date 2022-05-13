@@ -22,6 +22,13 @@ const errorHandler = (err, req, res, next) => {
             field: '',
             message: `${modelName} does not exist with provided id`
         })
+    } else if (err.code === 'ERR_BAD_REQUEST') {
+        const { status, message } = err.response.data.error
+        err.statusCode = status
+        errors.push({
+            field: '',
+            message: message
+        })
     }
     return res.status(err.statusCode || 400).json(errors)
 }

@@ -13,6 +13,9 @@ const studySetSchema = mongoose.Schema(
             type: mongoose.Types.ObjectId,
             ref: 'User',
         },
+        playlistId: {
+            type: String,
+        },
         recentlyViewedUsers: [
             {
                 type: mongoose.Types.ObjectId,
