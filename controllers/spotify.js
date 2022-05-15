@@ -61,13 +61,8 @@ const handleCallback = async (req, res) => {
 
 const addNewPlaylist = async(req, res) => {
     const { studySetId, spotifyData, name } = req.body
-
-    if (!spotifyData) {
-        throw new UnauthorizedError('No access token provided')
-    }
-
-    const { spotifyId } = spotifyData
-    const accessToken = await refreshAccessToken(spotifyData)
+    await refreshAccessToken(spotifyData)
+    const { spotifyId, access_token } = spotifyData
     const studySet = await StudySet.findById(studySetId)
 
     const response = await AXIOS.post(`/users/${spotifyId}/playlists`, {
@@ -75,14 +70,34 @@ const addNewPlaylist = async(req, res) => {
         description: `Study Stream Playlist For Study Set Titled ${studySet.title}`
     }, {
         headers: {
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${access_token}`
         }
     })
 
     if (response.status === 201) {
         await StudySet.findByIdAndUpdate(studySetId, { playlistId: response.data.id })
-        res.status(201).json({ spotifyData: {...spotifyData, access_token: accessToken} })
+        res.status(201).json({ spotifyData })
     }
 }
 
-module.exports = { handleCallback, addNewPlaylist }
+const getTracks = async (req, res) => {
+    const { studySetId, spotifyData } = req.query
+
+    const parsedData = JSON.parse(spotifyData || '{}')
+
+    await refreshAccessToken(parsedData)
+    const { access_token } = parsedData
+    const { playlistId } = await StudySet.findById(studySetId)
+
+    const response = await AXIOS.get(`/playlists/${playlistId}/tracks`, {
+        headers: {
+            Authorization: `Bearer ${access_token}`
+        }
+    })
+
+    if (response.status === 200) {
+        res.status(200).json({ spotifyData: parsedData, tracks: response.data.items })
+    }
+}
+
+module.exports = { handleCallback, addNewPlaylist, getTracks }
