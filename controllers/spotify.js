@@ -110,16 +110,14 @@ const getTracks = async (req, res) => {
 }
 
 const removeTrack = async (req, res) => {
-    const { tracks, studySetId, spotifyData } = req.query
-    const parsedData = JSON.parse(spotifyData)
-    const parsedTracks = JSON.parse(tracks)
-    await refreshAccessToken(parsedData)
+    const { tracks, studySetId, spotifyData } = req.body
+    await refreshAccessToken(spotifyData)
     const { playlistId } = await StudySet.findById(studySetId)
-    const { access_token } = parsedData
+    const { access_token } = spotifyData
 
     const response = await AXIOS.delete(`/playlists/${playlistId}/tracks`, {
         data: {
-            tracks: parsedTracks,
+            tracks,
         },
         headers: {
             Authorization: `Bearer ${access_token}`,
@@ -127,7 +125,7 @@ const removeTrack = async (req, res) => {
     })
 
     if (response.status === 200) {
-        res.status(200).json({ spotifyData: parsedData, tracks: parsedTracks })
+        res.status(200).json({ spotifyData, tracks })
     }
 }
 
