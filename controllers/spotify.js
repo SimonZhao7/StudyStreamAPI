@@ -7,7 +7,6 @@ const refreshAccessToken = require('../util/refreshAccessToken')
 // API
 const axios = require('axios')
 const AXIOS = require('../api')
-const { UnauthorizedError } = require('../errors')
 
 const handleCallback = async (req, res) => {
     const { code, grantType } = req.body
@@ -87,7 +86,8 @@ const addNewPlaylist = async (req, res) => {
 }
 
 const getTracks = async (req, res) => {
-    const { studySetId, spotifyData } = req.query
+    const { studySetId } = req.params
+    const { spotifyData } = req.query
     const limit = req.query.limit || 20
     const page = req.query.page || 1
 
@@ -114,7 +114,8 @@ const getTracks = async (req, res) => {
 }
 
 const removeTrack = async (req, res) => {
-    const { tracks, studySetId, spotifyData } = req.body
+    const { studySetId } = req.params
+    const { tracks, spotifyData } = req.body
     await refreshAccessToken(spotifyData)
     const { playlistId } = await StudySet.findById(studySetId)
     const { access_token } = spotifyData

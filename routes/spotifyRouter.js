@@ -3,6 +3,8 @@ const { handleCallback, addNewPlaylist, getTracks, removeTrack } = require('../c
 
 router.route('/callback').post(handleCallback)
 
-router.route('/playlists').post(addNewPlaylist).get(getTracks).delete(removeTrack)
+router.route('/playlists').post(addNewPlaylist)
+
+router.route('/playlists/:studySetId').get(getTracks).delete(removeTrack)
 
 module.exports = router
