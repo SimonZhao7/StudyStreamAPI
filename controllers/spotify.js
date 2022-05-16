@@ -59,23 +59,29 @@ const handleCallback = async (req, res) => {
     }
 }
 
-const addNewPlaylist = async(req, res) => {
+const addNewPlaylist = async (req, res) => {
     const { studySetId, spotifyData, name } = req.body
     await refreshAccessToken(spotifyData)
     const { spotifyId, access_token } = spotifyData
     const studySet = await StudySet.findById(studySetId)
 
-    const response = await AXIOS.post(`/users/${spotifyId}/playlists`, {
-        name,
-        description: `Study Stream Playlist For Study Set Titled ${studySet.title}`
-    }, {
-        headers: {
-            Authorization: `Bearer ${access_token}`
+    const response = await AXIOS.post(
+        `/users/${spotifyId}/playlists`,
+        {
+            name,
+            description: `Study Stream Playlist For Study Set Titled ${studySet.title}`,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
         }
-    })
+    )
 
     if (response.status === 201) {
-        await StudySet.findByIdAndUpdate(studySetId, { playlistId: response.data.id })
+        await StudySet.findByIdAndUpdate(studySetId, {
+            playlistId: response.data.id,
+        })
         res.status(201).json({ spotifyData })
     }
 }
@@ -91,13 +97,38 @@ const getTracks = async (req, res) => {
 
     const response = await AXIOS.get(`/playlists/${playlistId}/tracks`, {
         headers: {
-            Authorization: `Bearer ${access_token}`
-        }
+            Authorization: `Bearer ${access_token}`,
+        },
     })
 
     if (response.status === 200) {
-        res.status(200).json({ spotifyData: parsedData, tracks: response.data.items })
+        res.status(200).json({
+            spotifyData: parsedData,
+            tracks: response.data.items,
+        })
     }
 }
 
-module.exports = { handleCallback, addNewPlaylist, getTracks }
+const removeTrack = async (req, res) => {
+    const { tracks, studySetId, spotifyData } = req.query
+    const parsedData = JSON.parse(spotifyData)
+    const parsedTracks = JSON.parse(tracks)
+    await refreshAccessToken(parsedData)
+    const { playlistId } = await StudySet.findById(studySetId)
+    const { access_token } = parsedData
+
+    const response = await AXIOS.delete(`/playlists/${playlistId}/tracks`, {
+        data: {
+            tracks: parsedTracks,
+        },
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    })
+
+    if (response.status === 200) {
+        res.status(200).json({ spotifyData: parsedData, tracks: parsedTracks })
+    }
+}
+
+module.exports = { handleCallback, addNewPlaylist, getTracks, removeTrack }
