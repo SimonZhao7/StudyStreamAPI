@@ -88,6 +88,8 @@ const addNewPlaylist = async (req, res) => {
 
 const getTracks = async (req, res) => {
     const { studySetId, spotifyData } = req.query
+    const limit = req.query.limit || 20
+    const page = req.query.page || 1
 
     const parsedData = JSON.parse(spotifyData || '{}')
 
@@ -95,16 +97,18 @@ const getTracks = async (req, res) => {
     const { access_token } = parsedData
     const { playlistId } = await StudySet.findById(studySetId)
 
-    const response = await AXIOS.get(`/playlists/${playlistId}/tracks`, {
+    const response = await AXIOS.get(`/playlists/${playlistId}/tracks?limit=${limit}&offset=${(page - 1) * limit}`, {
         headers: {
             Authorization: `Bearer ${access_token}`,
         },
     })
 
     if (response.status === 200) {
+        const { items, limit, total } = response.data
         res.status(200).json({
             spotifyData: parsedData,
-            tracks: response.data.items,
+            tracks: items,
+            maxPages: Math.ceil(total / limit)
         })
     }
 }
