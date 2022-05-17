@@ -134,4 +134,39 @@ const removeTrack = async (req, res) => {
     }
 }
 
-module.exports = { handleCallback, addNewPlaylist, getTracks, removeTrack }
+const search = async (req, res) => {
+    const searchTerm = req.query.searchTerm || ''
+    const limit = req.query.limit || 20
+    const page = req.query.page || 1
+    const offset = (page - 1) * limit
+    const { spotifyData } = req.query
+    const parsedData = await JSON.parse(spotifyData)
+
+    await refreshAccessToken(parsedData)
+    const { access_token } = parsedData
+
+    if (searchTerm) {
+        const response = await AXIOS.get('/search', {
+            params: {
+                q: searchTerm,
+                type: 'track',
+                offset,
+                limit,
+                market: 'US'
+            },
+            headers: {
+                Authorization: `Bearer ${access_token}`
+            }
+        })
+    
+        if (response.status === 200) {
+            console.log(response.data)
+            const { tracks } = response.data
+            const { total } = tracks
+            const maxPages = Math.ceil(total / limit)
+            res.status(200).json({ spotifyData: parsedData, results: tracks, maxPages })
+        }
+    }
+}
+
+module.exports = { handleCallback, addNewPlaylist, getTracks, removeTrack, search }
