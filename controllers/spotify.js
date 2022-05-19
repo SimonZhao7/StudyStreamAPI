@@ -115,14 +115,14 @@ const getTracks = async (req, res) => {
 
 const removeTrack = async (req, res) => {
     const { studySetId } = req.params
-    const { tracks, spotifyData } = req.body
+    const { track, spotifyData } = req.body
     await refreshAccessToken(spotifyData)
     const { playlistId } = await StudySet.findById(studySetId)
     const { access_token } = spotifyData
 
     const response = await AXIOS.delete(`/playlists/${playlistId}/tracks`, {
         data: {
-            tracks,
+            tracks: [track],
         },
         headers: {
             Authorization: `Bearer ${access_token}`,
@@ -130,7 +130,7 @@ const removeTrack = async (req, res) => {
     })
 
     if (response.status === 200) {
-        res.status(200).json({ spotifyData, tracks })
+        res.status(200).json({ spotifyData, track })
     }
 }
 
@@ -160,7 +160,6 @@ const search = async (req, res) => {
         })
     
         if (response.status === 200) {
-            console.log(response.data)
             const { tracks } = response.data
             const { total } = tracks
             const maxPages = Math.ceil(total / limit)
@@ -169,4 +168,32 @@ const search = async (req, res) => {
     }
 }
 
-module.exports = { handleCallback, addNewPlaylist, getTracks, removeTrack, search }
+const addTrack = async(req, res) => {
+    const { studySetId } = req.params
+    const { uri, spotifyData } = req.body
+    const { playlistId } = await StudySet.findById(studySetId)
+    await refreshAccessToken(spotifyData)
+    const { access_token } = spotifyData
+
+    const response = await AXIOS.post(`/playlists/${playlistId}/tracks`, {
+        uris: [uri],
+    }, 
+    {
+        headers: {
+            Authorization: `Bearer ${access_token}`
+        }
+    })
+
+    if (response.status === 201) {
+        const trackId = uri.split(':')[2]
+        const addedTrack = (await AXIOS.get(`/tracks/${trackId}`, {
+            headers: {
+                Authorization: `Bearer ${access_token}`
+            }
+        })).data
+
+        res.status(201).json({ addedTrack, spotifyData })
+    }
+}
+
+module.exports = { handleCallback, addNewPlaylist, getTracks, removeTrack, search, addTrack }
