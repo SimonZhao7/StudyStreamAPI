@@ -15,6 +15,7 @@ const refreshAccessToken = async (spotifyData, userId) => {
         if (new Date() - expires_in_ms > new Date(dateAccessed)) {
             return await requestTokenRefresh(refresh_token)
         }
+        return spotifyData
     } else if (userId) {
         const { spotifyRefreshToken } = await User.findById(userId)
         return await requestTokenRefresh(spotifyRefreshToken)
