@@ -3,7 +3,7 @@ const User = require('../models/user')
 const StudySet = require('../models/studySet')
 // Util
 const { Buffer } = require('buffer')
-const refreshAccessToken = require('../util/refreshAccessToken')
+const { refreshAccessToken, generateSpotifyData } = require('../util')
 // API
 const axios = require('axios')
 const AXIOS = require('../api')
@@ -40,28 +40,15 @@ const handleCallback = async (req, res) => {
             { runValidators: true }
         )
 
-        const spotifyId = (
-            await AXIOS.get('/me', {
-                headers: {
-                    Authorization: `Bearer ${access_token}`,
-                },
-            })
-        ).data.id
-
-        res.status(200).json({
-            access_token,
-            refresh_token,
-            spotifyId,
-            expires_in_ms: expires_in * 1000,
-            dateAccessed: new Date(),
-        })
+        const spotifyData = await generateSpotifyData(access_token, refresh_token, expires_in)
+        res.status(200).json(spotifyData)
     }
 }
 
 const addNewPlaylist = async (req, res) => {
     const { studySetId, spotifyData, name } = req.body
-    await refreshAccessToken(spotifyData)
-    const { spotifyId, access_token } = spotifyData
+    const updatedSpotifyData = await refreshAccessToken(spotifyData, req.user.userId)
+    const { spotifyId, access_token } = updatedSpotifyData
     const studySet = await StudySet.findById(studySetId)
 
     const response = await AXIOS.post(
@@ -81,7 +68,7 @@ const addNewPlaylist = async (req, res) => {
         await StudySet.findByIdAndUpdate(studySetId, {
             playlistId: response.data.id,
         })
-        res.status(201).json({ spotifyData })
+        res.status(201).json({ spotifyData: updatedSpotifyData })
     }
 }
 
@@ -93,8 +80,8 @@ const getTracks = async (req, res) => {
 
     const parsedData = JSON.parse(spotifyData || '{}')
 
-    await refreshAccessToken(parsedData)
-    const { access_token } = parsedData
+    const updatedSpotifyData = await refreshAccessToken(parsedData, req.user.userId)
+    const { access_token } = updatedSpotifyData
     const { playlistId } = await StudySet.findById(studySetId)
 
     const response = await AXIOS.get(`/playlists/${playlistId}/tracks?limit=${limit}&offset=${(page - 1) * limit}`, {
@@ -106,7 +93,7 @@ const getTracks = async (req, res) => {
     if (response.status === 200) {
         const { items, limit, total } = response.data
         res.status(200).json({
-            spotifyData: parsedData,
+            spotifyData: updatedSpotifyData,
             tracks: items,
             maxPages: Math.ceil(total / limit)
         })
@@ -116,9 +103,9 @@ const getTracks = async (req, res) => {
 const removeTrack = async (req, res) => {
     const { studySetId } = req.params
     const { track, spotifyData } = req.body
-    await refreshAccessToken(spotifyData)
+    const updatedSpotifyData = await refreshAccessToken(spotifyData)
     const { playlistId } = await StudySet.findById(studySetId)
-    const { access_token } = spotifyData
+    const { access_token } = updatedSpotifyData
 
     const response = await AXIOS.delete(`/playlists/${playlistId}/tracks`, {
         data: {
@@ -130,7 +117,7 @@ const removeTrack = async (req, res) => {
     })
 
     if (response.status === 200) {
-        res.status(200).json({ spotifyData, track })
+        res.status(200).json({ spotifyData: updatedSpotifyData, track })
     }
 }
 
@@ -140,10 +127,10 @@ const search = async (req, res) => {
     const page = req.query.page || 1
     const offset = (page - 1) * limit
     const { spotifyData } = req.query
-    const parsedData = await JSON.parse(spotifyData)
+    const parsedData = await JSON.parse(spotifyData || '{}')
 
-    await refreshAccessToken(parsedData)
-    const { access_token } = parsedData
+    const updatedSpotifyData = await refreshAccessToken(parsedData, req.user.userId)
+    const { access_token } = updatedSpotifyData
 
     if (searchTerm) {
         const response = await AXIOS.get('/search', {
@@ -163,7 +150,7 @@ const search = async (req, res) => {
             const { tracks } = response.data
             const { total } = tracks
             const maxPages = Math.ceil(total / limit)
-            res.status(200).json({ spotifyData: parsedData, results: tracks, maxPages })
+            res.status(200).json({ spotifyData: updatedSpotifyData, results: tracks, maxPages })
         }
     }
 }
@@ -172,7 +159,7 @@ const addTrack = async(req, res) => {
     const { studySetId } = req.params
     const { uri, spotifyData } = req.body
     const { playlistId } = await StudySet.findById(studySetId)
-    await refreshAccessToken(spotifyData)
+    const updatedSpotifyData = await refreshAccessToken(spotifyData, req.user.userId)
     const { access_token } = spotifyData
 
     const response = await AXIOS.post(`/playlists/${playlistId}/tracks`, {
@@ -192,7 +179,7 @@ const addTrack = async(req, res) => {
             }
         })).data
 
-        res.status(201).json({ addedTrack, spotifyData })
+        res.status(201).json({ addedTrack, spotifyData: updatedSpotifyData })
     }
 }
 
