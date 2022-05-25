@@ -6,11 +6,14 @@ const {
     removeTrack,
     search,
     addTrack,
+    getRecommendations,
 } = require('../controllers/spotify')
 
 router.route('/callback').post(handleCallback)
 
 router.route('/playlists').post(addNewPlaylist).get(search)
+
+router.route('/tracks').get(getRecommendations)
 
 router
     .route('/playlists/:studySetId')
