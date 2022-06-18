@@ -29,6 +29,12 @@ const errorHandler = (err, req, res, next) => {
             field: '',
             message: message
         })
+    } else if (err.code === 11000) {
+        const field = Object.keys(err.keyValue)[0]
+        errors.push({
+            field,
+            message: `The provided ${field} already exists`
+        })
     }
     return res.status(err.statusCode || 400).json(errors)
 }

@@ -49,10 +49,6 @@ const userSchema = mongoose.Schema({
     }
 })
 
-userSchema.plugin(uniqueValidator, {
-    message: 'A user already exists with the provided {PATH}',
-})
-
 userSchema.methods.getJWT = async function () {
     const { _id: userId } = this
     const payload = { userId }
