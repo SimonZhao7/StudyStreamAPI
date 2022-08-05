@@ -93,7 +93,7 @@ const getTracks = async (req, res) => {
         res.status(200).json({
             spotifyData: updatedSpotifyData,
             tracks: items,
-            maxPages: Math.ceil(total / limit)
+            maxPages: Math.max(1, Math.ceil(total / limit))
         })
     }
 }

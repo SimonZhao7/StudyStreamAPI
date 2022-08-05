@@ -5,6 +5,7 @@ const connectDB = require('./db/connect')
 // Middleware
 const errorHandler = require('./middleware/errorHandler')
 const authMiddleware = require('./middleware/auth')
+const fileUpload = require('express-fileupload')
 // Routes
 const userAuthRouter = require('./routes/userAuthRouter')
 const userRouter = require('./routes/userRouter')
@@ -22,6 +23,7 @@ var corsOptions = {
 
 app.use(express.json())
 app.use(cors(corsOptions))
+app.use(fileUpload())
 
 app.use('/api/v1/auth', userAuthRouter)
 

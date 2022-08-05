@@ -1,5 +1,6 @@
 const User = require('../models/user')
 const { DoesNotExistError, BadRequestError } = require('../errors')
+const storage = require('../config')
 
 const getUser = async (req, res) => {
     const { id } = req.params
@@ -29,11 +30,11 @@ const updateUser = async (req, res) => {
         password,
         newPassword,
         confirmPassword,
-        userImage,
         spotifyRefreshToken,
     } = req.body
 
     const user = await User.findOne({ _id: id })
+    let userImage = user.userImage
 
     if (
         (email !== undefined ||
@@ -58,18 +59,28 @@ const updateUser = async (req, res) => {
         }
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-        id,
+    if (req.files) {
+        const { name, data } = req.files.userImage
+        const bucketName = process.env.BUCKET_NAME
+        await storage.bucket(bucketName).file(name).save(data)
+        userImage = encodeURI(`https://storage.googleapis.com/${bucketName}/${name}`)
+    }
+
+    const result = await User.updateOne(
+        { _id: id },
         {
             email,
             username,
             userImage,
             spotifyRefreshToken,
         },
-        { runValidators: true, new: true }
+        {
+            runValidators: true,
+        }
     )
 
-    res.status(200).json(updatedUser)
+    const updatedUser = await User.findById(id)
+    res.status(200).json({ result, updatedUser })
 }
 
 module.exports = { getUser, getCurrentUser, updateUser }
