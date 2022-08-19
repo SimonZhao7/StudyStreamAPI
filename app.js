@@ -27,13 +27,11 @@ app.use(fileUpload())
 
 app.use('/api/v1/auth', userAuthRouter)
 
-app.use(authMiddleware)
-
 // Auth Routes
-app.use('/api/v1/users', userRouter)
-app.use('/api/v1/studysets', studySetRouter)
-app.use('/api/v1/flashcards', flashcardRouter)
-app.use('/api/v1/spotify', spotifyRouter)
+app.use('/api/v1/users', authMiddleware, userRouter)
+app.use('/api/v1/studysets', authMiddleware, studySetRouter)
+app.use('/api/v1/flashcards', authMiddleware, flashcardRouter)
+app.use('/api/v1/spotify', authMiddleware, spotifyRouter)
 
 app.use(errorHandler)
 
