@@ -9,7 +9,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError')
 const axios = require('axios')
 
 const refreshAccessToken = async (spotifyData, userId) => {
-    if (Object.keys(spotifyData).length > 0) {
+    if (spotifyData && Object.keys(spotifyData).length > 0) {
         const { expires_in_ms, dateAccessed, refresh_token } = spotifyData
 
         if (new Date() - expires_in_ms > new Date(dateAccessed)) {
